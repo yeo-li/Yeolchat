@@ -3,8 +3,13 @@ package com.yeo_li.yeolchat.service;
 import com.yeo_li.yeolchat.dto.user.UserDto;
 import com.yeo_li.yeolchat.dto.user.UserResultDto;
 import com.yeo_li.yeolchat.entity.User;
+import com.yeo_li.yeolchat.exception.AlreadyLoginException;
+import com.yeo_li.yeolchat.exception.UserAlreadyExsistsException;
+import com.yeo_li.yeolchat.exception.YeoliException;
 import com.yeo_li.yeolchat.repository.UserRepository;
 import com.yeo_li.yeolchat.repository.UserRepositoryImpl;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,43 +20,72 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
+
     @Override
-    public UserDto convertToDTO(User user) {
-        return null;
+    public void signUp(UserDto userDto) {
+
     }
 
     @Override
-    public User convertToEntity(UserDto userDTO) {
-        return null;
-    }
+    public void signIn(UserDto userDto) {
+        User user = findUser(userDto);
+        if(user.isLogin()) {
+            throw new AlreadyLoginException();
+        }
 
-
-    @Override
-    public void saveUser(UserDto userDto) {
-        //TODO pw 단방향 암호화
-
-        // userDto user Entity로 변환
-        User user = new User();
-        user.setName(userDto.getName());
-        user.setUser_id(userDto.getUserId());
-        user.setUser_pw(userDto.getUserPw());
-        user.setEmail(userDto.getEmail());
-
-        // DB 저장
+        user.setLogin(true);
         userRepository.save(user);
+    }
 
-        return;
+    @Override
+    public void logout(UserDto userDto) {
+
+    }
+
+    @Override
+    public void createUser(UserDto userDto) {
+        // 기존에 있는 회원 인지 확인
+        try{
+            findUser(userDto);
+        } catch (RuntimeException e) {
+            //TODO 왜 런타임만 되는거지... NoResultException 못 잡음
+            //TODO pw 단방향 암호화
+
+
+            // userDto user Entity로 변환
+            User user = new User();
+            user.setName(userDto.getName());
+            user.setUser_id(userDto.getUserId());
+            user.setUser_pw(userDto.getUserPw());
+            user.setEmail(userDto.getEmail());
+
+            // DB 저장
+            userRepository.save(user);
+
+            return;
+        }
+
+        throw new UserAlreadyExsistsException("이미 가입되어 있는 회원입니다.");
     }
 
     @Override
     public void deleteUser(UserDto userDto) {
+        User user = findUser(userDto);
 
+        userRepository.remove(user);
     }
 
     @Override
     public User findUser(UserDto userDTO) {
+        // 1중 검증
+        User user = findByUserId(userDTO.getUserId());
 
-        return null;
+        return user;
+
+
+        //TODO 예외처리 해야함
+
+
     }
 
     @Override
@@ -64,7 +98,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findByEmail(String email) {
-        return null;
+
+        User user = userRepository.findByEmail(email);
+
+        return user;
     }
 
     @Override

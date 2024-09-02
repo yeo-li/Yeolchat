@@ -29,23 +29,33 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User remove(User user) {
+        if(user != null) {
+            em.remove(user);
+        } else {
+            throw new RuntimeException("UserRepository/remove: User Not Found:" + user.getUser_id());
+        }
+
         return null;
     }
 
     @Override
     public User findByUserId(String user_id) {
-        User user = em.createQuery("SELECT u FROM User u WHERE u.user_id = :user_id", User.class)
-                .setParameter("user_id", user_id)
-                .getSingleResult();
-        if(user == null){
-            throw new YeoliException("UserRepositoryImpl/findByUserId: Id를 가지고 있는 회원이 없습니다.");
-        }
-        return user;
+            User user = em.createQuery("SELECT u FROM User u WHERE u.user_id = :user_id", User.class)
+                    .setParameter("user_id", user_id)
+                    .getSingleResult();
+
+            return user;
+
+
     }
 
     @Override
     public User findByEmail(String email) {
-        return null;
+        User user = em.createQuery("SELECT u FROM User u WHERE u.email = :email", User.class)
+                .setParameter("email", email)
+                .getSingleResult();
+
+        return user;
     }
 
 }

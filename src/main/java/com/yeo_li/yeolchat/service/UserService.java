@@ -5,23 +5,14 @@ import com.yeo_li.yeolchat.entity.User;
 
 public interface UserService {
 
-    // DTO <-> Entity converter
+    // TODO DTO <-> Entity converter
 
-    /**
-     * convertToDTO는 repository에서 받은 user entity를 UserDTO로
-     * 변환시키는 로직을 수행합니다.
-     */
-    UserDto convertToDTO(User user);
-
-    /**
-     * save, delete를 수행할 때, UserDTO를 entity로 변환하는 로직을 수행합니다.
-     * @param userDTO
-     * @return
-     */
-    User convertToEntity(UserDto userDTO);
+    void signUp(UserDto userDto);
+    void signIn(UserDto userDto);
+    void logout(UserDto userDto);
 
     // save and delete
-    void saveUser(UserDto userDTO);
+    void createUser(UserDto userDTO);
     void deleteUser(UserDto userDTO);
 
     // find

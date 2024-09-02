@@ -16,13 +16,11 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/save")
-    public User createUser(@RequestBody UserDto userDTO){
+    public void createUser(@RequestBody UserDto userDTO){
 
-        //userService.saveUser(userDTO);
-        User user1 = userService.findByUserId("ert2154");
-        System.out.println("user1 = " + user1);
+        userService.createUser(userDTO);
+        //User user1 = userService.findByUserId("ert215465");
 
-        return user1;
     }
 }
 

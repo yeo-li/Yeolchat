@@ -27,7 +27,7 @@ public class UserServiceTest {
         user1.setEmail("ert2143@naver.com");
 
         // When
-        userService.saveUser(user1);
+        userService.createUser(user1);
 
         User user2 = userRepository.findByUserId(user1.getUserId());
 
