@@ -1,5 +1,6 @@
 package com.yeo_li.yeolchat.controller;
 
+import com.yeo_li.yeolchat.dto.user.UserDto;
 import com.yeo_li.yeolchat.entity.User;
 import com.yeo_li.yeolchat.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +15,15 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping
-    public User createUser(@RequestBody User user){
-        return userService.saveUser(user);
+    @PostMapping("/save")
+    public User createUser(@RequestBody UserDto userDTO){
+
+        //userService.saveUser(userDTO);
+        User user1 = userService.findByUserId("ert2154");
+        System.out.println("user1 = " + user1);
+
+        return user1;
     }
 }
+
+
