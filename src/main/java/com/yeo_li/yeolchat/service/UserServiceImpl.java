@@ -5,14 +5,12 @@ import com.yeo_li.yeolchat.dto.user.signIn.UserSignInRequest;
 import com.yeo_li.yeolchat.dto.user.signOut.UserSignOutRequest;
 import com.yeo_li.yeolchat.dto.user.signUp.UserSignUpRequest;
 import com.yeo_li.yeolchat.entity.User;
-import com.yeo_li.yeolchat.exception.AlreadySignInException;
 import com.yeo_li.yeolchat.exception.InvalidPasswordException;
 import com.yeo_li.yeolchat.exception.UserAlreadyExsistsException;
 import com.yeo_li.yeolchat.exception.UserEmailAlreadyExsistsException;
 import com.yeo_li.yeolchat.repository.UserRepository;
 import com.yeo_li.yeolchat.util.Sha256PasswordEncoder;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
@@ -29,15 +27,10 @@ public class UserServiceImpl implements UserService {
         String newUserId = userSignUpRequestDto.getUserId();
         String newUserEmail = userSignUpRequestDto.getEmail();
 
-        // 아이디 중복 예외처리
         if (isExistUserByUserId(newUserId)) {
-            // throw 기존 회원이 있습니다!
             throw new UserAlreadyExsistsException("유효하지 않은 아이디에요. 다시 입력해 주세요.");
         }
-
-        // 이메일 중복 예외처리
         if (isExistUserByEmail(newUserEmail)) {
-            // throw 이메일이 중복됩니다!
             throw new UserEmailAlreadyExsistsException("이메일 중복 다시 입력해 주세요.");
         }
 
@@ -66,9 +59,6 @@ public class UserServiceImpl implements UserService {
         }
 
         // 여기까지 왔다는 것은, 로그인에 결격사유가 없다는 것!
-
-        userRepository.save(user);
-
         // 이제 인증 성공한 사용자라는 뜻으로 이를 증명하는 증표를 발급해서 리턴해쥬야겟쥬???
         // 토ㄱ큰이라등가 세션키라등가,,,???????????????????????????
         // TODO 예아
@@ -79,23 +69,21 @@ public class UserServiceImpl implements UserService {
         // 그 요청을 날린 사람은 바로 로그인에 성공한 사용자라는 것을 의미함니다.
         String token = String.format("sexy_boy:%s", user.getUser_id());
 
+        // controller에서 토큰을 UserId로 변환하여 서비스로 넘김! 사실상 컨트롤러가 문지기 역할을 해주는거임.
         return token;
     }
 
     @Override
     public void signOut(UserSignOutRequest userSignOutRequest) {
         User user = findByUserId(userSignOutRequest.getUserId());
-
+        // 토큰 삭제 요청 보내기?
     }
 
 
     @Override
-    public void saveUser(UserSignUpRequest userDto) {
-        //String hashUserPw = hashByBcrypt(userDto.getUserPw());
-        //userDto.setUserPw(hashUserPw);
-
+    public void saveUser(UserSignUpRequest userSignUpRequest) {
         // userDto user Entity로 변환
-        User user = convertToEntity(userDto);
+        User user = convertToEntityAtSignUp(userSignUpRequest, passwordEncoder);
         // DB 저장
         userRepository.save(user);
     }
@@ -117,10 +105,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findByEmail(String email) {
-
-        User user = userRepository.findByEmail(email);
-
-        return user;
+        return userRepository.findByEmail(email);
     }
 
     @Override
@@ -152,12 +137,12 @@ public class UserServiceImpl implements UserService {
 
     //////////////////////////////////// etc methods
 
-    public User convertToEntity(UserSignUpRequest userDto) {
+    public User convertToEntityAtSignUp(UserSignUpRequest userSignUpRequest, Sha256PasswordEncoder passwordEncoder) {
         User user = new User();
-        user.setName(userDto.getName());
-        user.setUser_id(userDto.getUserId());
-        user.setUser_pw(userDto.getUserPw());
-        user.setEmail(userDto.getEmail());
+        user.setName(userSignUpRequest.getName());
+        user.setUser_id(userSignUpRequest.getUserId());
+        user.setUser_pw(userSignUpRequest.getUserPw(), passwordEncoder);
+        user.setEmail(userSignUpRequest.getEmail());
 
         return user;
     }

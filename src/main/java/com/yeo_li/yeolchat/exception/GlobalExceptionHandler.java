@@ -30,7 +30,9 @@ public class GlobalExceptionHandler {
         return "UserAlreadyExsistsException: "+e.getMessage();
     }
 
-
-
-
+    @ExceptionHandler(UserEmailAlreadyExsistsException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String userEmailAlreadyExsistsExceptionHandler(UserEmailAlreadyExsistsException e){
+        return "UserEmailAlreadyExsistsException: "+e.getMessage();
+    }
 }

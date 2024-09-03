@@ -14,7 +14,7 @@ public class UserController {
     @PostMapping("/save")
     public void createUser(@RequestBody UserSignUpRequest userDTO){
 
-        userService.saveUser(userDTO);
+        userService.signUp(userDTO);
         //User user1 = userService.findByUserId("ert215465");
 
     }
