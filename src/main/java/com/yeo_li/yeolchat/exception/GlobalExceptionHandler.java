@@ -19,8 +19,8 @@ public class GlobalExceptionHandler {
 
 
 
-    @ExceptionHandler(AlreadyLoginException.class)
-    public String alredyLoginExceptionHandler(AlreadyLoginException e){
+    @ExceptionHandler(AlreadySignInException.class)
+    public String alredyLoginExceptionHandler(AlreadySignInException e){
         return "AleadyLoginException: "+e.getMessage();
     }
 

@@ -1,5 +1,6 @@
 package com.yeo_li.yeolchat.entity;
 
+import com.yeo_li.yeolchat.util.Sha256PasswordEncoder;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,11 +31,6 @@ public class User {
     @Column(nullable = false)
     private String email;
 
-    @Column(nullable = false)
-    private boolean isLogin;
-
-
-
 
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -43,4 +39,12 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Message> messages;
+
+
+    public boolean passwordMatches(String plainPassword, Sha256PasswordEncoder encoder) {
+        String rawPassword = plainPassword;
+        String hashedPassword = this.user_pw;
+
+        return encoder.matches(rawPassword, hashedPassword);
+    }
 }

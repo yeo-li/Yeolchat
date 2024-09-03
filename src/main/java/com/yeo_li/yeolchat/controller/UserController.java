@@ -1,13 +1,9 @@
 package com.yeo_li.yeolchat.controller;
 
-import com.yeo_li.yeolchat.dto.user.UserDto;
-import com.yeo_li.yeolchat.entity.User;
+import com.yeo_li.yeolchat.dto.user.signUp.UserSignUpRequest;
 import com.yeo_li.yeolchat.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/users")
@@ -16,9 +12,9 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/save")
-    public void createUser(@RequestBody UserDto userDTO){
+    public void createUser(@RequestBody UserSignUpRequest userDTO){
 
-        userService.createUser(userDTO);
+        userService.saveUser(userDTO);
         //User user1 = userService.findByUserId("ert215465");
 
     }

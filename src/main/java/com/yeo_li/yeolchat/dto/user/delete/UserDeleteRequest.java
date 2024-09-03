@@ -1,17 +1,13 @@
-package com.yeo_li.yeolchat.dto.user;
-
+package com.yeo_li.yeolchat.dto.user.delete;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 @Getter @Setter
-@ToString
-public class UserDto {
+public class UserDeleteRequest {
+
     private String name;
     private String userId;
     private String userPw;
     private String email;
-
-
 }

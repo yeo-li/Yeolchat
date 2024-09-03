@@ -1,30 +1,31 @@
 package com.yeo_li.yeolchat.service;
 
-import com.yeo_li.yeolchat.dto.user.UserDto;
+import com.yeo_li.yeolchat.dto.user.delete.UserDeleteRequest;
+import com.yeo_li.yeolchat.dto.user.signIn.UserSignInRequest;
+import com.yeo_li.yeolchat.dto.user.signOut.UserSignOutRequest;
+import com.yeo_li.yeolchat.dto.user.signUp.UserSignUpRequest;
 import com.yeo_li.yeolchat.entity.User;
 
 public interface UserService {
 
     // TODO DTO <-> Entity converter
 
-    void signUp(UserDto userDto);
-    void signIn(UserDto userDto);
-    void logout(UserDto userDto);
+    void signUp(UserSignUpRequest userSignUpRequest);
+    String signIn(UserSignInRequest userSignInRequest);
+    void signOut(UserSignOutRequest userSignOutRequest);
 
     // save and delete
-    void createUser(UserDto userDTO);
-    void deleteUser(UserDto userDTO);
+    void saveUser(UserSignUpRequest userSignUpRequest);
+    void deleteUser(UserDeleteRequest userDeleteRequest);
 
     // find
-    User findUser(UserDto userDTO);
     User findByUserId(String userId);
     User findByEmail(String email);
 
     // update
-    void updateUser(String UserId, UserDto updateUser);
+    void updateUser(String UserId, UserSignUpRequest updateUser);
 
     // judge
     boolean isExistUserByUserId(String userId);
     boolean isExistUserByEmail(String email);
-    boolean isIdAndPwValid(String idOrPw);
 }

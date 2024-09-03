@@ -1,17 +1,19 @@
 package com.yeo_li.yeolchat.service;
 
-import com.yeo_li.yeolchat.dto.user.UserDto;
-import com.yeo_li.yeolchat.dto.user.UserResultDto;
+import com.yeo_li.yeolchat.dto.user.delete.UserDeleteRequest;
+import com.yeo_li.yeolchat.dto.user.signIn.UserSignInRequest;
+import com.yeo_li.yeolchat.dto.user.signOut.UserSignOutRequest;
+import com.yeo_li.yeolchat.dto.user.signUp.UserSignUpRequest;
 import com.yeo_li.yeolchat.entity.User;
-import com.yeo_li.yeolchat.exception.AlreadyLoginException;
+import com.yeo_li.yeolchat.exception.AlreadySignInException;
+import com.yeo_li.yeolchat.exception.InvalidPasswordException;
 import com.yeo_li.yeolchat.exception.UserAlreadyExsistsException;
-import com.yeo_li.yeolchat.exception.YeoliException;
+import com.yeo_li.yeolchat.exception.UserEmailAlreadyExsistsException;
 import com.yeo_li.yeolchat.repository.UserRepository;
-import com.yeo_li.yeolchat.repository.UserRepositoryImpl;
-import jakarta.persistence.NoResultException;
-import jakarta.persistence.PersistenceException;
+import com.yeo_li.yeolchat.util.Sha256PasswordEncoder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,81 +21,98 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final Sha256PasswordEncoder passwordEncoder;
 
 
     @Override
-    public void signUp(UserDto userDto) {
+    public void signUp(UserSignUpRequest userSignUpRequestDto) {
+        String newUserId = userSignUpRequestDto.getUserId();
+        String newUserEmail = userSignUpRequestDto.getEmail();
+
+        // 아이디 중복 예외처리
+        if (isExistUserByUserId(newUserId)) {
+            // throw 기존 회원이 있습니다!
+            throw new UserAlreadyExsistsException("유효하지 않은 아이디에요. 다시 입력해 주세요.");
+        }
+
+        // 이메일 중복 예외처리
+        if (isExistUserByEmail(newUserEmail)) {
+            // throw 이메일이 중복됩니다!
+            throw new UserEmailAlreadyExsistsException("이메일 중복 다시 입력해 주세요.");
+        }
+
+        // save user
+        saveUser(userSignUpRequestDto);
 
     }
 
     @Override
-    public void signIn(UserDto userDto) {
-        User user = findUser(userDto);
-        if(user.isLogin()) {
-            throw new AlreadyLoginException();
+    public String signIn(UserSignInRequest userSignInRequest) {
+        String userId = userSignInRequest.getUserId();
+        User user = findByUserId(userId); // 여기선 예외가 터져도 심각하지 않음. 혹시 있더라도 controllerAdvice에서 catch. 따라서 유저 정보가 있다고 가정.
+
+        // 여기까지 왔다는건 저.. 요청자가 제시한 사용자 ID에 대응되는 사용자가 존재는 한다는 것
+
+        /*
+            1. 사용자를 id로 조회함
+            2. 그 뒤 pw도 맞는지 확인, 아니라면 throw InvalidPasswordException!
+            3. pw도 맞다면, 토큰 발급 후 로그인 처리
+         */
+
+        // TODO 이 부분에 대해서 정리할 필요가 있음.
+        // passwordEncoder를 인자로 넣어주는지. 그 이유는 책임을 분리하여 서비스의 크기가 비대해지는 것을 막기 위해서임.
+        if (!user.passwordMatches(userSignInRequest.getUserPw(), passwordEncoder)) {
+            throw new InvalidPasswordException("비밀번호가 일치하지 않아요.");
         }
 
-        user.setLogin(true);
+        // 여기까지 왔다는 것은, 로그인에 결격사유가 없다는 것!
+
+        userRepository.save(user);
+
+        // 이제 인증 성공한 사용자라는 뜻으로 이를 증명하는 증표를 발급해서 리턴해쥬야겟쥬???
+        // 토ㄱ큰이라등가 세션키라등가,,,???????????????????????????
+        // TODO 예아
+
+        // 이 토큰은 오직 로그인에 성공한, 자신의 아이디와 비밀번호를 알고 있는,
+        // 즉슨 사용자 본인에게 발급되는겁니다.
+        // 다음번 요청에 이 토큰을 들고 오면은!
+        // 그 요청을 날린 사람은 바로 로그인에 성공한 사용자라는 것을 의미함니다.
+        String token = String.format("sexy_boy:%s", user.getUser_id());
+
+        return token;
+    }
+
+    @Override
+    public void signOut(UserSignOutRequest userSignOutRequest) {
+        User user = findByUserId(userSignOutRequest.getUserId());
+
+    }
+
+
+    @Override
+    public void saveUser(UserSignUpRequest userDto) {
+        //String hashUserPw = hashByBcrypt(userDto.getUserPw());
+        //userDto.setUserPw(hashUserPw);
+
+        // userDto user Entity로 변환
+        User user = convertToEntity(userDto);
+        // DB 저장
         userRepository.save(user);
     }
 
     @Override
-    public void logout(UserDto userDto) {
+    public void deleteUser(UserDeleteRequest userDeleteRequest) {
+        String deleteUserId = userDeleteRequest.getUserId();
 
-    }
-
-    @Override
-    public void createUser(UserDto userDto) {
-        // 기존에 있는 회원 인지 확인
-        try{
-            findUser(userDto);
-        } catch (RuntimeException e) {
-            //TODO 왜 런타임만 되는거지... NoResultException 못 잡음
-            //TODO pw 단방향 암호화
-
-
-            // userDto user Entity로 변환
-            User user = new User();
-            user.setName(userDto.getName());
-            user.setUser_id(userDto.getUserId());
-            user.setUser_pw(userDto.getUserPw());
-            user.setEmail(userDto.getEmail());
-
-            // DB 저장
-            userRepository.save(user);
-
-            return;
-        }
-
-        throw new UserAlreadyExsistsException("이미 가입되어 있는 회원입니다.");
-    }
-
-    @Override
-    public void deleteUser(UserDto userDto) {
-        User user = findUser(userDto);
+        User user = findByUserId(deleteUserId);
 
         userRepository.remove(user);
     }
 
-    @Override
-    public User findUser(UserDto userDTO) {
-        // 1중 검증
-        User user = findByUserId(userDTO.getUserId());
-
-        return user;
-
-
-        //TODO 예외처리 해야함
-
-
-    }
 
     @Override
     public User findByUserId(String userId) {
-
-        User user = userRepository.findByUserId(userId);
-
-        return user;
+        return userRepository.findByUserId(userId);
     }
 
     @Override
@@ -105,22 +124,43 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUser(String UserId, UserDto updateUser) {
+    public void updateUser(String UserId, UserSignUpRequest updateUser) {
 
     }
 
     @Override
     public boolean isExistUserByUserId(String userId) {
-        return false;
+        try {
+            findByUserId(userId);
+            return true;
+        } catch (EmptyResultDataAccessException e) {
+            //TODO 왜 런타임만 되는거지... NoResultException 못 잡음
+            return false;
+        }
     }
 
     @Override
     public boolean isExistUserByEmail(String email) {
-        return false;
+        try {
+            findByEmail(email);
+            return true;
+        } catch (EmptyResultDataAccessException e) {
+            return false;
+        }
     }
 
-    @Override
-    public boolean isIdAndPwValid(String idOrPw) {
-        return false;
+
+    //////////////////////////////////// etc methods
+
+    public User convertToEntity(UserSignUpRequest userDto) {
+        User user = new User();
+        user.setName(userDto.getName());
+        user.setUser_id(userDto.getUserId());
+        user.setUser_pw(userDto.getUserPw());
+        user.setEmail(userDto.getEmail());
+
+        return user;
     }
+
+
 }

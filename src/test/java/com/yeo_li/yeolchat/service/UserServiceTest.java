@@ -1,7 +1,7 @@
 package com.yeo_li.yeolchat.service;
 
 import com.yeo_li.yeolchat.Repository.UserRepositoryImplTest;
-import com.yeo_li.yeolchat.dto.user.UserDto;
+import com.yeo_li.yeolchat.dto.user.signUp.UserSignUpRequest;
 import com.yeo_li.yeolchat.entity.User;
 
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,7 @@ public class UserServiceTest {
     @Test
     public void createUser() {
         // Given
-        UserDto user1 = new UserDto();
+        UserSignUpRequest user1 = new UserSignUpRequest();
 
         user1.setUserId("100");
         user1.setUserPw("200");
@@ -27,7 +27,7 @@ public class UserServiceTest {
         user1.setEmail("ert2143@naver.com");
 
         // When
-        userService.createUser(user1);
+        userService.saveUser(user1);
 
         User user2 = userRepository.findByUserId(user1.getUserId());
 
