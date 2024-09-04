@@ -67,7 +67,7 @@ public class User {
         if(validateUserName(name)) {
             this.name = name;
         } else{
-            throw new InvalidUserNameException("InvalidUserNameException: 이름을 다시 입력해주세요.");
+            throw new InvalidUserNameException("이름을 다시 입력해주세요.");
         }
     }
 
@@ -75,7 +75,7 @@ public class User {
         if(validateUserIdAndPassword(user_id)){
             this.user_id = user_id;
         } else{
-            throw new InvalidUserIdException("InvalidUserIdException: 아이디를 다시 입력해 주세요.(9~20자, 알파벳 대소문자 및 특수문자 사용 가능)");
+            throw new InvalidUserIdException("아이디를 다시 입력해 주세요.(9~20자, 알파벳 대소문자 및 특수문자 사용 가능)");
         }
     }
 
@@ -90,7 +90,7 @@ public class User {
     }
 
     public boolean validateUserIdAndPassword(String userIdOr){
-        //TODO [User entity] 비밀번호, 아이디 정책 설정
+        //TODO 리팩토링
         // 9~20 사이의 공백을 제외한 문자열
         int lengthOfUserIdOrPassword = userIdOr.length();
 
@@ -105,6 +105,37 @@ public class User {
         return false;
     }
 
+
+    public boolean validateEmail(String email) {
+        // 이메일에 공백이 있는지 확인
+        if (email.contains(" ")) {
+            return false;
+        }
+        // @와 .이 각각 하나씩만 포함되어 있는지 확인
+        int atCount = email.length() - email.replace("@", "").length();
+        int dotCount = email.length() - email.replace(".", "").length();
+
+        // @와 .이 각각 정확히 하나씩만 있는지 확인
+        if (atCount == 1 && dotCount == 1) {
+            return true;
+        }
+        return false;
+
+    }
+
+    public boolean validateUserName(String name){
+        //TODO [User entity] 이름 공백 예외처리
+        return true;
+    }
+
+    private boolean containSpaces(String userIdOr) {
+        if(userIdOr.contains(".")){
+            return true;
+        }
+        return false;
+    }
+
+
     private boolean exsistSpaces(String userIdOr) {
         if(userIdOr.contains(" ")){
             return true;
@@ -117,14 +148,4 @@ public class User {
         return userIdOr.matches(".*[ㄱ-ㅎㅏ-ㅣ가-힣]+.*");
     }
 
-    public boolean validateEmail(String email) {
-        //TODO [User entity] 이메일 주소 정책 설정
-        return true;
-
-    }
-
-    public boolean validateUserName(String name){
-        //TODO [User entity] 이름 공백 예외처리
-        return true;
-    }
 }

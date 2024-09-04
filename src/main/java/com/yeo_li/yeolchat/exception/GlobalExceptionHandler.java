@@ -41,4 +41,16 @@ public class GlobalExceptionHandler {
     public String invalidPasswordHandler(InvalidPasswordException e){
         return "InvalidPasswordException: "+e.getMessage();
     }
+
+    @ExceptionHandler(InvalidUserIdException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String InvalidUserIdExceptionHandler(InvalidUserIdException e){
+        return "InvalidUserIdException: "+e.getMessage();
+    }
+
+    @ExceptionHandler(InvalidEmailException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String InvalidEmailExceptionHandler(InvalidEmailException e){
+        return "InvalidEmailException: "+e.getMessage();
+    }
 }
