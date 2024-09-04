@@ -89,7 +89,7 @@ public class User {
 
     }
 
-    public boolean validateUserIdAndPassword(String userIdOr){
+    private boolean validateUserIdAndPassword(String userIdOr){
         //TODO 리팩토링
         // 9~20 사이의 공백을 제외한 문자열
         int lengthOfUserIdOrPassword = userIdOr.length();
@@ -106,7 +106,7 @@ public class User {
     }
 
 
-    public boolean validateEmail(String email) {
+    private boolean validateEmail(String email) {
         // 이메일에 공백이 있는지 확인
         if (email.contains(" ")) {
             return false;
@@ -123,7 +123,7 @@ public class User {
 
     }
 
-    public boolean validateUserName(String name){
+    private boolean validateUserName(String name){
         if(!name.isEmpty() && name.length() <= 20) {
             if(!exsistSpaces(name)){
                 return true;
