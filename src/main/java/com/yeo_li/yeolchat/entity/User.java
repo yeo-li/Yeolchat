@@ -9,7 +9,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.antlr.v4.runtime.misc.NotNull;
 
 import java.util.List;
 
@@ -59,7 +58,7 @@ public class User {
         if(validateUserIdAndPassword(user_pw)){
             this.user_pw = encoder.encode(user_pw);
         } else{
-            throw new InvalidPasswordException("InvalidUserIdException: 비밀번호를 다시 입력해 주세요.(9~20자, 알파벳 대소문자 및 특수문자 사용 가능)");
+            throw new InvalidPasswordException("비밀번호를 다시 입력해 주세요.(9~20자, 알파벳 대소문자 및 특수문자 사용 가능)");
         }
 
     }
@@ -92,8 +91,30 @@ public class User {
 
     public boolean validateUserIdAndPassword(String userIdOr){
         //TODO [User entity] 비밀번호, 아이디 정책 설정
-        return true;
+        // 9~20 사이의 공백을 제외한 문자열
+        int lengthOfUserIdOrPassword = userIdOr.length();
 
+        if(exsistSpaces(userIdOr)){
+            return false;
+        } else if(9 <= lengthOfUserIdOrPassword && lengthOfUserIdOrPassword <= 20){
+            if(exsistKorean(userIdOr)){
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private boolean exsistSpaces(String userIdOr) {
+        if(userIdOr.contains(" ")){
+            return true;
+        }
+        return false;
+    }
+
+    public boolean exsistKorean(String userIdOr) {
+        // 한글이 포함되어 있는지 확인하는 정규표현식
+        return userIdOr.matches(".*[ㄱ-ㅎㅏ-ㅣ가-힣]+.*");
     }
 
     public boolean validateEmail(String email) {
@@ -105,6 +126,5 @@ public class User {
     public boolean validateUserName(String name){
         //TODO [User entity] 이름 공백 예외처리
         return true;
-
     }
 }

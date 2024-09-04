@@ -35,4 +35,10 @@ public class GlobalExceptionHandler {
     public String userEmailAlreadyExsistsExceptionHandler(UserEmailAlreadyExsistsException e){
         return "UserEmailAlreadyExsistsException: "+e.getMessage();
     }
+
+    @ExceptionHandler(InvalidPasswordException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String invalidPasswordHandler(InvalidPasswordException e){
+        return "InvalidPasswordException: "+e.getMessage();
+    }
 }
