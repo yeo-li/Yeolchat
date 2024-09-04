@@ -124,16 +124,15 @@ public class User {
     }
 
     public boolean validateUserName(String name){
-        //TODO [User entity] 이름 공백 예외처리
-        return true;
-    }
-
-    private boolean containSpaces(String userIdOr) {
-        if(userIdOr.contains(".")){
-            return true;
+        if(!name.isEmpty() && name.length() <= 20) {
+            if(!exsistSpaces(name)){
+                return true;
+            }
         }
         return false;
     }
+
+
 
 
     private boolean exsistSpaces(String userIdOr) {
@@ -143,7 +142,7 @@ public class User {
         return false;
     }
 
-    public boolean exsistKorean(String userIdOr) {
+    private boolean exsistKorean(String userIdOr) {
         // 한글이 포함되어 있는지 확인하는 정규표현식
         return userIdOr.matches(".*[ㄱ-ㅎㅏ-ㅣ가-힣]+.*");
     }

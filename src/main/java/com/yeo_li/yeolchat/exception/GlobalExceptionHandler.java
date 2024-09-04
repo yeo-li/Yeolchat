@@ -53,4 +53,10 @@ public class GlobalExceptionHandler {
     public String InvalidEmailExceptionHandler(InvalidEmailException e){
         return "InvalidEmailException: "+e.getMessage();
     }
+
+    @ExceptionHandler(InvalidUserNameException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String InvalidUserNameExceptionHandler(InvalidUserNameException e){
+        return "InvalidUserNameException: "+e.getMessage();
+    }
 }
