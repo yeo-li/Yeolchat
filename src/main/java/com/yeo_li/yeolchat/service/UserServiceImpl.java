@@ -73,8 +73,9 @@ public class UserServiceImpl implements UserService {
         // 즉슨 사용자 본인에게 발급되는겁니다.
         // 다음번 요청에 이 토큰을 들고 오면은!
         // 그 요청을 날린 사람은 바로 로그인에 성공한 사용자라는 것을 의미함니다.
-        String token = String.format("sexy_boy:%s", user.getUser_id());
+        String token = String.format("yeolchatToken:%s", user.getUser_id());
 
+        
         // controller에서 토큰을 UserId로 변환하여 서비스로 넘김! 사실상 컨트롤러가 문지기 역할을 해주는거임.
         return token;
     }
