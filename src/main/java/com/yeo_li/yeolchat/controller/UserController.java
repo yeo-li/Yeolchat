@@ -20,8 +20,6 @@ public class UserController {
 
         userService.signUp(userDTO);
 
-
-        HttpHeaders header = new HttpHeaders();
         return new ResponseEntity<>("회원가입이 정상적으로 수행되었습니다.", HttpStatus.OK);
     }
 }

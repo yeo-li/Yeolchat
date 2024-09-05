@@ -3,6 +3,7 @@ package com.yeo_li.yeolchat.service;
 import com.yeo_li.yeolchat.dto.user.delete.UserDeleteRequest;
 import com.yeo_li.yeolchat.dto.user.signIn.UserSignInRequest;
 import com.yeo_li.yeolchat.dto.user.signOut.UserSignOutRequest;
+import com.yeo_li.yeolchat.dto.user.signUp.UserSignUpParam;
 import com.yeo_li.yeolchat.dto.user.signUp.UserSignUpRequest;
 import com.yeo_li.yeolchat.entity.User;
 import com.yeo_li.yeolchat.exception.InvalidPasswordException;
@@ -13,6 +14,8 @@ import com.yeo_li.yeolchat.util.Sha256PasswordEncoder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +41,9 @@ public class UserServiceImpl implements UserService {
         saveUser(userSignUpRequestDto);
 
     }
+
+
+
 
     @Override
     public String signIn(UserSignInRequest userSignInRequest) {
@@ -143,6 +149,7 @@ public class UserServiceImpl implements UserService {
         user.setUser_id(userSignUpRequest.getUserId());
         user.setUser_pw(userSignUpRequest.getUserPw(), passwordEncoder);
         user.setEmail(userSignUpRequest.getEmail());
+        user.setCreated_at(new Date());
 
         return user;
     }

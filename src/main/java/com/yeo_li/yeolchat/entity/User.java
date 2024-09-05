@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -36,7 +37,8 @@ public class User {
     @Column(nullable = false)
     private String email;
 
-
+    @Column(nullable = false)
+    private Date created_at;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatroomList> chatroomLists;
