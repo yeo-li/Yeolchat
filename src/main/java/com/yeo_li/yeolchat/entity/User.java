@@ -96,17 +96,16 @@ public class User {
     private boolean validateUserIdAndPassword(String userIdOr){
         //TODO 리팩토링
         // 9~20 사이의 공백을 제외한 문자열
-        int lengthOfUserIdOrPassword = userIdOr.length();
+        if(existSpaces(userIdOr)){
+            return false;
+        }
 
         if(existSpaces(userIdOr)){
             return false;
-        } else if(9 <= lengthOfUserIdOrPassword && lengthOfUserIdOrPassword <= 20){
-            if(existKorean(userIdOr)){
-                return false;
-            }
-            return true;
         }
-        return false;
+
+        int lengthOfUserIdOrPassword = userIdOr.length();
+        return 9 <= lengthOfUserIdOrPassword && lengthOfUserIdOrPassword <= 20;
     }
 
     private boolean validateEmail(String email) {
