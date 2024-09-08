@@ -94,7 +94,6 @@ public class User {
 
 
     private boolean validateUserIdAndPassword(String userIdOr){
-        //TODO 리팩토링
         // 9~20 사이의 공백을 제외한 문자열
         if(existSpaces(userIdOr)){
             return false;
@@ -110,7 +109,7 @@ public class User {
 
     private boolean validateEmail(String email) {
         // 이메일에 공백이 있는지 확인
-        if (email.contains(" ")) {
+        if(existSpaces(email)){
             return false;
         }
         // @와 .이 각각 하나씩만 포함되어 있는지 확인
@@ -121,6 +120,7 @@ public class User {
         if (atCount == 1 && dotCount == 1) {
             return true;
         }
+
         return false;
 
     }
@@ -136,16 +136,16 @@ public class User {
 
 
 
-    private boolean existSpaces(String userIdOr) {
-        if(userIdOr.contains(" ")){
+    private boolean existSpaces(String str) {
+        if(str.contains(" ")){
             return true;
         }
         return false;
     }
 
-    private boolean existKorean(String userIdOr) {
+    private boolean existKorean(String str) {
         // 한글이 포함되어 있는지 확인하는 정규표현식
-        return userIdOr.matches(".*[ㄱ-ㅎㅏ-ㅣ가-힣]+.*");
+        return str.matches(".*[ㄱ-ㅎㅏ-ㅣ가-힣]+.*");
     }
 
 }
