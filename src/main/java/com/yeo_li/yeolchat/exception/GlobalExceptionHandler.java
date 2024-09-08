@@ -60,9 +60,9 @@ public class GlobalExceptionHandler {
         return "InvalidUserNameException: "+e.getMessage();
     }
 
-    @ExceptionHandler(AlreadySigninOutException.class)
+    @ExceptionHandler(SignOutInfoNotFoundException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public String AlreadySiginOutExceptionHandler(InvalidUserNameException e){
-        return "AlreadySigninOutException: "+e.getMessage();
+    public String AlreadySigOutExceptionHandler(SignOutInfoNotFoundException e){
+        return "AlreadySignOutException: "+e.getMessage();
     }
 }

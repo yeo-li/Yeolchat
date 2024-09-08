@@ -4,12 +4,9 @@ import com.yeo_li.yeolchat.dto.user.delete.UserDeleteRequest;
 import com.yeo_li.yeolchat.dto.user.signIn.UserSignInRequest;
 import com.yeo_li.yeolchat.dto.user.signIn.UserSignInResult;
 import com.yeo_li.yeolchat.dto.user.signOut.UserSignOutRequest;
-import com.yeo_li.yeolchat.dto.user.signUp.UserSignUpParam;
 import com.yeo_li.yeolchat.dto.user.signUp.UserSignUpRequest;
 import com.yeo_li.yeolchat.entity.User;
-import com.yeo_li.yeolchat.exception.InvalidPasswordException;
-import com.yeo_li.yeolchat.exception.UserAlreadyExsistsException;
-import com.yeo_li.yeolchat.exception.UserEmailAlreadyExsistsException;
+import com.yeo_li.yeolchat.exception.*;
 import com.yeo_li.yeolchat.repository.UserRepository;
 import com.yeo_li.yeolchat.util.Sha256PasswordEncoder;
 import jakarta.servlet.http.Cookie;
@@ -49,15 +46,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserSignInResult signIn(UserSignInRequest userSignInRequest) {
         String userId = userSignInRequest.getUserId();
-        User user = findByUserId(userId); // 여기선 예외가 터져도 심각하지 않음. 혹시 있더라도 controllerAdvice에서 catch. 따라서 유저 정보가 있다고 가정.
 
+        // 회원 유무 조회
+        if(!isExistUserByUserId(userId)){
+            throw new InvalidUserIdException("아이디가 일치하지 않아요.");
+        }
+
+        User user = findByUserId(userId); // 여기선 예외가 터져도 심각하지 않음. 혹시 있더라도 controllerAdvice에서 catch. 따라서 유저 정보가 있다고 가정.
         // 여기까지 왔다는건 저.. 요청자가 제시한 사용자 ID에 대응되는 사용자가 존재는 한다는 것
 
-        /*
-            1. 사용자를 id로 조회함
-            2. 그 뒤 pw도 맞는지 확인, 아니라면 throw InvalidPasswordException!
-            3. pw도 맞다면, 토큰 발급 후 로그인 처리
-         */
 
         // TODO 이 부분에 대해서 정리할 필요가 있음.
         // passwordEncoder를 인자로 넣어주는지. 그 이유는 책임을 분리하여 서비스의 크기가 비대해지는 것을 막기 위해서임.
@@ -73,21 +70,18 @@ public class UserServiceImpl implements UserService {
         // 즉슨 사용자 본인에게 발급되는겁니다.
         // 다음번 요청에 이 토큰을 들고 오면은!
         // 그 요청을 날린 사람은 바로 로그인에 성공한 사용자라는 것을 의미함니다.
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss");
-        LocalDateTime atSignIn = LocalDateTime.now();
-        LocalDateTime expiresAt = atSignIn.plusMinutes(30);
-        String dateString = expiresAt.format(formatter);
+
+        // tokem 발급
+        String token = createToken(user);
+        // TODO 허용 토큰 DB에 저장
+        // TODO 허용 토큰 DB에 있다면 기존에 있던 토큰 삭제
+        // TODO 이건 모듈로 빼야할 것 같은데, 사용자에게 요청이 들어올 때 마다 허용 토큰인지 계속 확인하기
 
 
-        String token = String.format("%s:%s",dateString, user.getUser_id());
-
+        // UserSignInResultDto 전환
         UserSignInResult userSignInResult = new UserSignInResult();
         userSignInResult.setUserName(user.getName());
         userSignInResult.setToken(token);
-
-
-        // TODO 토큰을 저장한 뒤 30분이 지나면 허용 토큰을 삭제하는 로직 만들기
-
 
         // controller에서 토큰을 UserId로 변환하여 서비스로 넘김! 사실상 컨트롤러가 문지기 역할을 해주는거임.
         return userSignInResult;
@@ -168,18 +162,42 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Cookie expireCookie(Cookie cookie) {
-        cookie.setValue("");
+    public Cookie expireCookie(String name) {
+        Cookie cookie = new Cookie(name, "");
         cookie.setPath("/");
         cookie.setMaxAge(0);  // 유효기간을 0으로 설정하여 삭제
 
         return cookie;
     }
 
+    @Override
+    public Cookie findCookie(String name, Cookie[] cookies) {
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (name.equals(cookie.getName())) {
+                    return cookie;
+                }
+            }
+        }
+
+        throw new SignOutInfoNotFoundException("로그인 정보가 없습니다.");
+    }
+
+    @Override
+    public boolean isTokenPresent(String name, Cookie[] cookies) {
+        try{
+            findCookie(name, cookies);
+        } catch (SignOutInfoNotFoundException e){
+            return false;
+        }
+
+        return true;
+    }
+
 
     //////////////////////////////////// etc methods
 
-    public User convertToEntityAtSignUp(UserSignUpRequest userSignUpRequest, Sha256PasswordEncoder passwordEncoder) {
+    private User convertToEntityAtSignUp(UserSignUpRequest userSignUpRequest, Sha256PasswordEncoder passwordEncoder) {
         User user = new User();
         user.setName(userSignUpRequest.getName());
         user.setUser_id(userSignUpRequest.getUserId());
@@ -188,6 +206,15 @@ public class UserServiceImpl implements UserService {
         user.setCreated_at(new Date());
 
         return user;
+    }
+
+    private String createToken(User user){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss");
+        LocalDateTime atSignIn = LocalDateTime.now();
+        LocalDateTime expiresAt = atSignIn.plusMinutes(30);
+        String dateString = expiresAt.format(formatter);
+
+        return dateString+":"+user.getUser_id();
     }
 
 

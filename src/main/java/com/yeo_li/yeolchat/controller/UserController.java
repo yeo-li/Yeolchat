@@ -3,7 +3,7 @@ package com.yeo_li.yeolchat.controller;
 import com.yeo_li.yeolchat.dto.user.signIn.UserSignInRequest;
 import com.yeo_li.yeolchat.dto.user.signIn.UserSignInResult;
 import com.yeo_li.yeolchat.dto.user.signUp.UserSignUpRequest;
-import com.yeo_li.yeolchat.exception.AlreadySigninOutException;
+import com.yeo_li.yeolchat.exception.SignOutInfoNotFoundException;
 import com.yeo_li.yeolchat.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,29 +45,21 @@ public class UserController {
 
 
     @PostMapping("/signout")
-    public ResponseEntity<String> signOut(HttpServletRequest request, HttpServletResponse response) throws AlreadySigninOutException {
-            // TODO 로그아웃 구현하기
-
+    public ResponseEntity<String> signOut(HttpServletRequest request, HttpServletResponse response) throws SignOutInfoNotFoundException {
         String cookieName = "signInToken";
-
+        // 사용자에게 토큰 가져오기
         Cookie[] cookies = request.getCookies();
 
+        if(userService.isTokenPresent(cookieName, cookies)){
+            Cookie expiredToken = userService.expireCookie(cookieName);
 
-        // UserService 영역인가
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookieName.equals(cookie.getName())) {
-                    // 토큰 찾기
-                    Cookie expiredCookie = userService.expireCookie(cookie);
-                    // 토큰 만료 시키기
-                    response.addCookie(expiredCookie);
-                    return new ResponseEntity<>("로그아웃 되었습니다.", HttpStatus.OK);
-                }
-            }
+            // 같은 이름의 만료된 쿠키를 덮어씌워서 기존 토큰 지우기
+            response.addCookie(expiredToken);
+
+            return new ResponseEntity<>("로그아웃 되었습니다.", HttpStatus.OK);
         }
 
-        throw new AlreadySigninOutException("이미 로그아웃 되었습니다.");
-
+        throw new SignOutInfoNotFoundException("로그아웃할 정보가 없습니다.");
     }
 
 

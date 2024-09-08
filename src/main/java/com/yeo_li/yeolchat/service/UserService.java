@@ -6,6 +6,7 @@ import com.yeo_li.yeolchat.dto.user.signIn.UserSignInResult;
 import com.yeo_li.yeolchat.dto.user.signOut.UserSignOutRequest;
 import com.yeo_li.yeolchat.dto.user.signUp.UserSignUpRequest;
 import com.yeo_li.yeolchat.entity.User;
+import com.yeo_li.yeolchat.exception.SignOutInfoNotFoundException;
 import jakarta.servlet.http.Cookie;
 
 public interface UserService {
@@ -33,5 +34,7 @@ public interface UserService {
 
     //cookie
     Cookie setCookie(String name, String value);
-    Cookie expireCookie(Cookie cookie);
+    Cookie expireCookie(String name);
+    Cookie findCookie(String name, Cookie[] cookies) throws SignOutInfoNotFoundException;
+    boolean isTokenPresent(String name, Cookie[] cookies);
 }
