@@ -2,16 +2,18 @@ package com.yeo_li.yeolchat.service;
 
 import com.yeo_li.yeolchat.dto.user.delete.UserDeleteRequest;
 import com.yeo_li.yeolchat.dto.user.signIn.UserSignInRequest;
+import com.yeo_li.yeolchat.dto.user.signIn.UserSignInResult;
 import com.yeo_li.yeolchat.dto.user.signOut.UserSignOutRequest;
 import com.yeo_li.yeolchat.dto.user.signUp.UserSignUpRequest;
 import com.yeo_li.yeolchat.entity.User;
+import jakarta.servlet.http.Cookie;
 
 public interface UserService {
 
     // TODO DTO <-> Entity converter
 
     void signUp(UserSignUpRequest userSignUpRequest);
-    String signIn(UserSignInRequest userSignInRequest);
+    UserSignInResult signIn(UserSignInRequest userSignInRequest);
     void signOut(UserSignOutRequest userSignOutRequest);
 
     // save and delete
@@ -28,4 +30,8 @@ public interface UserService {
     // judge
     boolean isExistUserByUserId(String userId);
     boolean isExistUserByEmail(String email);
+
+    //cookie
+    Cookie setCookie(String name, String value);
+    Cookie expireCookie(Cookie cookie);
 }

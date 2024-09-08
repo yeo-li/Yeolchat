@@ -91,22 +91,23 @@ public class User {
 
     }
 
+
+
     private boolean validateUserIdAndPassword(String userIdOr){
         //TODO 리팩토링
         // 9~20 사이의 공백을 제외한 문자열
         int lengthOfUserIdOrPassword = userIdOr.length();
 
-        if(exsistSpaces(userIdOr)){
+        if(existSpaces(userIdOr)){
             return false;
         } else if(9 <= lengthOfUserIdOrPassword && lengthOfUserIdOrPassword <= 20){
-            if(exsistKorean(userIdOr)){
+            if(existKorean(userIdOr)){
                 return false;
             }
             return true;
         }
         return false;
     }
-
 
     private boolean validateEmail(String email) {
         // 이메일에 공백이 있는지 확인
@@ -127,7 +128,7 @@ public class User {
 
     private boolean validateUserName(String name){
         if(!name.isEmpty() && name.length() <= 20) {
-            if(!exsistSpaces(name)){
+            if(!existSpaces(name)){
                 return true;
             }
         }
@@ -136,15 +137,14 @@ public class User {
 
 
 
-
-    private boolean exsistSpaces(String userIdOr) {
+    private boolean existSpaces(String userIdOr) {
         if(userIdOr.contains(" ")){
             return true;
         }
         return false;
     }
 
-    private boolean exsistKorean(String userIdOr) {
+    private boolean existKorean(String userIdOr) {
         // 한글이 포함되어 있는지 확인하는 정규표현식
         return userIdOr.matches(".*[ㄱ-ㅎㅏ-ㅣ가-힣]+.*");
     }

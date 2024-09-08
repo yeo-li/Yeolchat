@@ -2,6 +2,7 @@ package com.yeo_li.yeolchat.service;
 
 import com.yeo_li.yeolchat.dto.user.delete.UserDeleteRequest;
 import com.yeo_li.yeolchat.dto.user.signIn.UserSignInRequest;
+import com.yeo_li.yeolchat.dto.user.signIn.UserSignInResult;
 import com.yeo_li.yeolchat.dto.user.signOut.UserSignOutRequest;
 import com.yeo_li.yeolchat.dto.user.signUp.UserSignUpParam;
 import com.yeo_li.yeolchat.dto.user.signUp.UserSignUpRequest;
@@ -11,10 +12,13 @@ import com.yeo_li.yeolchat.exception.UserAlreadyExsistsException;
 import com.yeo_li.yeolchat.exception.UserEmailAlreadyExsistsException;
 import com.yeo_li.yeolchat.repository.UserRepository;
 import com.yeo_li.yeolchat.util.Sha256PasswordEncoder;
+import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 @Service
@@ -42,11 +46,8 @@ public class UserServiceImpl implements UserService {
 
     }
 
-
-
-
     @Override
-    public String signIn(UserSignInRequest userSignInRequest) {
+    public UserSignInResult signIn(UserSignInRequest userSignInRequest) {
         String userId = userSignInRequest.getUserId();
         User user = findByUserId(userId); // 여기선 예외가 터져도 심각하지 않음. 혹시 있더라도 controllerAdvice에서 catch. 따라서 유저 정보가 있다고 가정.
 
@@ -67,23 +68,36 @@ public class UserServiceImpl implements UserService {
         // 여기까지 왔다는 것은, 로그인에 결격사유가 없다는 것!
         // 이제 인증 성공한 사용자라는 뜻으로 이를 증명하는 증표를 발급해서 리턴해쥬야겟쥬???
         // 토ㄱ큰이라등가 세션키라등가,,,???????????????????????????
-        // TODO 예아
 
         // 이 토큰은 오직 로그인에 성공한, 자신의 아이디와 비밀번호를 알고 있는,
         // 즉슨 사용자 본인에게 발급되는겁니다.
         // 다음번 요청에 이 토큰을 들고 오면은!
         // 그 요청을 날린 사람은 바로 로그인에 성공한 사용자라는 것을 의미함니다.
-        String token = String.format("yeolchatToken:%s", user.getUser_id());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss");
+        LocalDateTime atSignIn = LocalDateTime.now();
+        LocalDateTime expiresAt = atSignIn.plusMinutes(30);
+        String dateString = expiresAt.format(formatter);
 
-        
+
+        String token = String.format("%s:%s",dateString, user.getUser_id());
+
+        UserSignInResult userSignInResult = new UserSignInResult();
+        userSignInResult.setUserName(user.getName());
+        userSignInResult.setToken(token);
+
+
+        // TODO 토큰을 저장한 뒤 30분이 지나면 허용 토큰을 삭제하는 로직 만들기
+
+
         // controller에서 토큰을 UserId로 변환하여 서비스로 넘김! 사실상 컨트롤러가 문지기 역할을 해주는거임.
-        return token;
+        return userSignInResult;
     }
 
     @Override
     public void signOut(UserSignOutRequest userSignOutRequest) {
         User user = findByUserId(userSignOutRequest.getUserId());
         // 토큰 삭제 요청 보내기?
+        // 혀옹 토큰 리스트에서 토큰 삭제 하기
     }
 
 
@@ -141,6 +155,27 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public Cookie setCookie(String name, String value) {
+
+        Cookie cookie = new Cookie(name, value);
+        cookie.setDomain("localhost");
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(30*60);
+        cookie.setPath("/");
+
+        return cookie;
+    }
+
+    @Override
+    public Cookie expireCookie(Cookie cookie) {
+        cookie.setValue("");
+        cookie.setPath("/");
+        cookie.setMaxAge(0);  // 유효기간을 0으로 설정하여 삭제
+
+        return cookie;
+    }
+
 
     //////////////////////////////////// etc methods
 
@@ -154,6 +189,8 @@ public class UserServiceImpl implements UserService {
 
         return user;
     }
+
+
 
 
 }

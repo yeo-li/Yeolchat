@@ -59,4 +59,10 @@ public class GlobalExceptionHandler {
     public String InvalidUserNameExceptionHandler(InvalidUserNameException e){
         return "InvalidUserNameException: "+e.getMessage();
     }
+
+    @ExceptionHandler(AlreadySigninOutException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String AlreadySiginOutExceptionHandler(InvalidUserNameException e){
+        return "AlreadySigninOutException: "+e.getMessage();
+    }
 }
