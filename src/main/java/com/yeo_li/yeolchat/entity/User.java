@@ -95,7 +95,7 @@ public class User {
 
     private boolean validateUserIdAndPassword(String userIdOr){
         // 9~20 사이의 공백을 제외한 문자열
-        if(existSpaces(userIdOr)){
+        if(existKorean(userIdOr)){
             return false;
         }
 
