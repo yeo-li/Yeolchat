@@ -1,7 +1,9 @@
 package com.yeo_li.yeolchat.controller;
 
 import com.yeo_li.yeolchat.dto.user.signIn.UserSignInRequest;
+import com.yeo_li.yeolchat.dto.user.signIn.UserSignInResponse;
 import com.yeo_li.yeolchat.dto.user.signIn.UserSignInResult;
+import com.yeo_li.yeolchat.dto.user.signOut.UserSignOutResponse;
 import com.yeo_li.yeolchat.dto.user.signUp.UserSignUpRequest;
 import com.yeo_li.yeolchat.exception.SignOutInfoNotFoundException;
 import com.yeo_li.yeolchat.service.UserService;
@@ -29,7 +31,7 @@ public class UserController {
 
 
     @PostMapping("/signin")
-    public ResponseEntity<String> signIn(@RequestBody UserSignInRequest userSignInRequest, HttpServletResponse response) {
+    public ResponseEntity<UserSignInResponse> signIn(@RequestBody UserSignInRequest userSignInRequest, HttpServletResponse response) {
 
         // UserSignInReseutDto 로 반환 받기
         // token, userName
@@ -40,12 +42,21 @@ public class UserController {
         Cookie cookie = userService.setCookie("signInToken", signInToken);
         response.addCookie(cookie);
 
-        return new ResponseEntity<>("환영합니다. "+userName+"님!", HttpStatus.OK);
+
+
+
+        UserSignInResponse userSignInResponse = new UserSignInResponse();
+        userSignInResponse.setMessage("로그인 성공");
+        userSignInResponse.setStatusCode(200);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userSignInResponse);
     }
 
 
     @PostMapping("/signout")
-    public ResponseEntity<String> signOut(HttpServletRequest request, HttpServletResponse response) throws SignOutInfoNotFoundException {
+    public ResponseEntity<UserSignOutResponse> signOut(HttpServletRequest request, HttpServletResponse response) throws SignOutInfoNotFoundException {
         String cookieName = "signInToken";
         // 사용자에게 토큰 가져오기
         Cookie[] cookies = request.getCookies();
@@ -56,7 +67,14 @@ public class UserController {
             // 같은 이름의 만료된 쿠키를 덮어씌워서 기존 토큰 지우기
             response.addCookie(expiredToken);
 
-            return new ResponseEntity<>("로그아웃 되었습니다.", HttpStatus.OK);
+
+            UserSignOutResponse userSignOutResponse = new UserSignOutResponse();
+            userSignOutResponse.setStatusCode(200);
+            userSignOutResponse.setMessage("로그아웃 완료");
+
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(userSignOutResponse);
         }
 
         throw new SignOutInfoNotFoundException("로그아웃할 정보가 없습니다.");

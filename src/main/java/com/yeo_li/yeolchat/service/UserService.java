@@ -10,9 +10,6 @@ import com.yeo_li.yeolchat.exception.SignOutInfoNotFoundException;
 import jakarta.servlet.http.Cookie;
 
 public interface UserService {
-
-    // TODO DTO <-> Entity converter
-
     void signUp(UserSignUpRequest userSignUpRequest);
     UserSignInResult signIn(UserSignInRequest userSignInRequest);
     void signOut(UserSignOutRequest userSignOutRequest);
@@ -26,7 +23,7 @@ public interface UserService {
     User findByEmail(String email);
 
     // update
-    void updateUser(String UserId, UserSignUpRequest updateUser);
+    // void updateUser(String UserId, UserSignUpRequest updateUser);
 
     // judge
     boolean isExistUserByUserId(String userId);

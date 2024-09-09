@@ -7,6 +7,8 @@ import com.yeo_li.yeolchat.dto.user.signOut.UserSignOutRequest;
 import com.yeo_li.yeolchat.dto.user.signUp.UserSignUpRequest;
 import com.yeo_li.yeolchat.entity.User;
 import com.yeo_li.yeolchat.exception.*;
+import com.yeo_li.yeolchat.exception.signUpException.UserSignUpAlreadyExsistsException;
+import com.yeo_li.yeolchat.exception.signUpException.UserSignUpEmailAlreadyExsistsException;
 import com.yeo_li.yeolchat.repository.UserRepository;
 import com.yeo_li.yeolchat.util.Sha256PasswordEncoder;
 import jakarta.servlet.http.Cookie;
@@ -32,10 +34,10 @@ public class UserServiceImpl implements UserService {
         String newUserEmail = userSignUpRequestDto.getEmail();
 
         if (isExistUserByUserId(newUserId)) {
-            throw new UserAlreadyExsistsException("유효하지 않은 아이디에요. 다시 입력해 주세요.");
+            throw new UserSignUpAlreadyExsistsException("유효하지 않은 아이디에요. 다시 입력해 주세요.");
         }
         if (isExistUserByEmail(newUserEmail)) {
-            throw new UserEmailAlreadyExsistsException("이메일 중복 다시 입력해 주세요.");
+            throw new UserSignUpEmailAlreadyExsistsException("이메일 중복 다시 입력해 주세요.");
         }
 
         // save user
@@ -76,6 +78,7 @@ public class UserServiceImpl implements UserService {
         // TODO 허용 토큰 DB에 저장
         // TODO 허용 토큰 DB에 있다면 기존에 있던 토큰 삭제
         // TODO 이건 모듈로 빼야할 것 같은데, 사용자에게 요청이 들어올 때 마다 허용 토큰인지 계속 확인하기
+        //  만약 만료된 토큰이라면 로그아웃 및 허용 토큰 리스트에서 삭제
 
 
         // UserSignInResultDto 전환
@@ -123,10 +126,12 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmail(email);
     }
 
-    @Override
-    public void updateUser(String UserId, UserSignUpRequest updateUser) {
 
-    }
+    // TODO updateUser는 시간 남으면 개발해~
+//    @Override
+//    public void updateUser(String UserId, UserSignUpRequest updateUser) {
+//
+//    }
 
     @Override
     public boolean isExistUserByUserId(String userId) {
@@ -152,10 +157,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public Cookie setCookie(String name, String value) {
 
+        
         Cookie cookie = new Cookie(name, value);
         cookie.setDomain("localhost");
         cookie.setHttpOnly(true);
-        cookie.setMaxAge(30*60);
+        cookie.setMaxAge(6*60*60); // 로그인 토큰 만료 기간은 6시간
         cookie.setPath("/");
 
         return cookie;

@@ -60,12 +60,3 @@ public class UserRepositoryImpl implements UserRepository {
 
 }
 
-
-/* TODO 에러코드 형식을 어떻게 해야하는가??
-
-{
-    statusCode
-    message
-    etcDate
-}
- */
