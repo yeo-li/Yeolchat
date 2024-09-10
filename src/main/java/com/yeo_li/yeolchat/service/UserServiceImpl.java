@@ -109,16 +109,18 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(UserDeleteRequest userDeleteRequest) {
         String deleteUserId = userDeleteRequest.getUserId();
-
-        User user = findByUserId(deleteUserId);
-
-        userRepository.remove(user);
+        if(isExistUserByUserId(deleteUserId)){
+            User user = findByUserId(deleteUserId);
+            userRepository.remove(user);
+        } else{
+            throw new DeleteUserNoDataException("삭제할 회원이 없습니다.");
+        }
     }
 
 
     @Override
     public User findByUserId(String userId) {
-        return userRepository.findByUserId(userId);
+         return userRepository.findByUserId(userId);
     }
 
     @Override
@@ -217,7 +219,7 @@ public class UserServiceImpl implements UserService {
     private String createToken(User user){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss");
         LocalDateTime atSignIn = LocalDateTime.now();
-        LocalDateTime expiresAt = atSignIn.plusMinutes(30);
+        LocalDateTime expiresAt = atSignIn.plusHours(6);
         String dateString = expiresAt.format(formatter);
 
         return dateString+":"+user.getUser_id();
